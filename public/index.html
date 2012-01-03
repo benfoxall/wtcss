@@ -1,0 +1,259 @@
+<!doctype html public "✰">
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" >
+  
+  <title>wtcss</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <meta name="author" content="@benjaminbenben">
+<style type="text/css" media="screen">
+body{margin:0;font-family:Helvetica,Arial,sans-serif;overflow-x:hidden;}
+#page{position:fixed;width:50%;background-color:#f5f5f5;height:100%;overflow:hidden;z-index:10;}
+ol{margin:0;position:absolute;z-index:1;left:50%;width:50%;padding:0;color:#aaa;font-size:.8em;}
+li{padding:8px;list-style:none;border-bottom:1px solid #f5f5f5;border-left:3px solid #08f;}
+li.none{border-left-color:#fff;}
+.selector{color:#f08;font-weight:bold;}
+canvas{position:absolute;width:100%;height:100%;}
+#rulecount{position:fixed;top:0;right:0;background-color:#fff;z-index:100;padding:.5em;color:#ccc;}
+#rulecount span{color:#999;cursor:pointer;}
+#rulecount span.selected{color:#f08;}
+#sites li:hover{cursor:pointer;color:#08f;}
+form{
+	padding:2em;
+}
+input#url{
+	margin-right:0;
+	width:50%;
+	font-size:1.3em;
+	border:none;
+	border-left:3px solid #08f;
+	padding:.5em;
+}
+input#sub{
+	border:none;
+	background-color:#fff;
+	padding:.5em;
+	font-size:1.3em;
+	cursor:pointer;
+}
+form p{
+	font-size:.75em;
+	color:#444;
+}
+
+#loading{
+	background-color:#08f;
+	color:#fff;
+	left:0%;
+	top:50%;
+	position:absolute;
+	margin: -.5em 1em;
+	font-size:1.2em;
+	padding:.5em;
+	text-shadow:#08f 0 0 2px;
+}
+ol{
+	-webkit-transform-origin: 0 0;
+	-webkit-transition: -webkit-transform .5s;
+}
+#zoom{
+	position:fixed;
+	bottom:0;
+	right:0;
+	padding:.5em;
+	background-color:#fff;
+	color:#08f;
+	font-size:2em;
+	z-index:50;
+	cursor:pointer;
+}
+img{display:none;}
+</style>
+</head>
+<body>
+	
+	<div id="rulecount">
+		<span class="total selected"></span> &raquo; <span class="active"></span>
+	</div>
+	<div id="zoom">-</div>
+	
+	<p id="loading">loading</p>
+	
+	<div id="page">
+		<form method="post">
+			<input type='text' value="http://" id="url" name="url"/>
+			<input type="submit" value="&raquo;" id="sub">	
+			<p>Enter a url to see how the css rules interact with that page</p>
+			<!--<h3>Examples</h3>
+			<ul id="sites">
+				<li>http://google.com</li>
+				<li>http://mozzila.com</li>
+				<li data-id="w3c">http://www.w3.org/</li>
+				<li data-id="bf">http://bfoxall.com</li>
+				
+			</ul> -->
+		</form>
+		<canvas id="canvas"></canvas>
+		<img>
+	</div>
+	<ol id="rules">
+	</ol>
+	
+	
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="lib/spinner.min.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript" charset="utf-8">
+  var scale = 1;
+	var load = function(key){		
+		var canvas = document.getElementById("canvas");  
+		
+		$(document).bind('render', function(){
+			var height = $(window).height(), width = $(window).width()/2;
+			canvas.width = width;
+			canvas.height = height;
+
+			if (canvas.getContext) {  
+				var ctx = canvas.getContext("2d");  
+				ctx.drawImage(document.images[0], 0,0);
+
+
+				// ctx.strokeStyle = "#08f";  
+
+				var top = $(document).scrollTop();
+				$('#rules li:visible').each(function(){
+					$rule = $(this);
+					var y = $(this).offset().top - top;
+					
+					if(y < 0 || y > height){return;}
+					
+					y += ($(this).outerHeight()*scale)/2;
+					
+					var links = $(this).data('links') || [];
+					var opacity = 0.25 + (0.75/links.length); // assign an opacity based on the number of links
+					
+					// #08f
+					ctx.strokeStyle = "rgba(0, 136, 255, "+opacity+")"; 
+					
+					$.each(links, function(i,link){
+						ctx.beginPath();  
+						ctx.moveTo(link[1],link[0]);
+
+						// ctx.lineTo(canvas.width,y);
+						// make it slightly more fancy
+						var controlX = (link[1] + width) / 2;
+						ctx.bezierCurveTo(controlX, y,controlX, y, width,y)
+
+						ctx.stroke();
+					});
+				});
+
+			}
+		});
+		
+		$(window).on('resize scroll', function(){
+			$(document).trigger('render');
+		});
+		
+		$('img').attr('src',key + '.png')
+		.on('load', function(){
+			$(document).trigger('render');
+		});
+		
+		// populate/hack
+		$.getJSON(key + '.json').done(function(data){
+			var $rules = $('#rules').empty();
+			$rules.css('left','0');
+			var tmpl = '<li><span class="selector"></span></li>';
+			var activeCount = 0;
+			$.each(data, function(_i, arr){
+				var rule = arr[0].split('{');
+				var el = $(tmpl);
+				el.find('.selector').text(rule[0])
+				el.append('{' + rule.slice(1).join('{'))
+				el.data('links', arr.slice(1));
+				if(arr.length == 1){
+					el.addClass('none');
+				} else {
+					activeCount++;
+				}
+				el.appendTo(rules);
+				
+			});
+			
+			$rules.animate({'left':'50%'});
+			$('#rulecount .total').text(data.length + ' rules');
+			$('#rulecount .active').text(activeCount + ' active');
+			$(document).trigger('render');
+		});
+		
+		$('#rulecount span').click(function(e){
+			$(this).addClass('selected').siblings().removeClass('selected');
+			var active = $(this).hasClass('active');
+			$('li.none').each(function(){
+				// this is ridiculously faster than .toggle
+				this.style.display = active ? 'none' : 'block';
+			})
+			$(document).trigger('render');
+		})
+	}
+
+	$(function(){
+		$('form').submit(function(e){
+			e.preventDefault();
+			var $form = $(this);
+			$.post('/', $form.serialize()).done(function(data){
+			console.log(data);
+				if(data.success){
+					
+					$('#loading').animate({left:'0%'}, function(){
+						load('data/' + data.success);	
+					});
+				} else {
+					console.error(data.error || 'unknown error');
+				}
+			});
+			
+			$form.find('input').blur().animate({width:0, opacity:0}, function(){
+				$form.slideUp();
+				$('#loading').animate({left:'50%'});
+			});
+			
+		})
+		
+		
+		
+		// $form = $('form');
+
+		// $('#loading').show();
+
+		$('#sites li').click(function(){
+			$('#sites').slideUp();
+			var id = $(this).data('id');
+			setTimeout(function(){
+				load('data/' + id);
+			},500);
+			
+		});
+		
+		$('#zoom').toggle(function(){
+			scale = 1/($('ol').height() / $(window).height());
+			$('ol').css({'-webkit-transform':'scale('+scale+')', backgroundColor:'#f5f5f5'});
+			setTimeout(function(){
+				$(document).trigger('render');
+			},500);
+			
+		},function(){
+			$('ol').css({'-webkit-transform':'scale(1)', backgroundColor:'#fff'});
+			
+			setTimeout(function(){
+				$(document).trigger('render');
+			},500);
+		})
+	});
+</script>
+</body>
+</html>
