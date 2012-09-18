@@ -4,39 +4,64 @@
 // - a screenshot of the page
 // - a list of the css rules and where they impact the page
 
-var fs = require('fs');
+var fs = require('fs'),
+    system = require('system'),
+    webserver = require('webserver');
 
-console.log(phantom.args);
+function get(url, callback){
+  var page = new WebPage();
 
-var url   = phantom.args[0] || 'http://bfoxall.com';
-var fnKey = phantom.args[1] || '_output';
+  page.viewportSize = { width: 800, height: 800 };
+  page.clipRect = { top: 0, left: 0, width: 800, height: 1600 };
 
-var page = new WebPage();
+  page.onLoadStarted = function () {
+    console.log('loading:' + url);
+  };
 
-page.viewportSize = { width: 800, height: 800 };
-page.clipRect = { top: 0, left: 0, width: 800, height: 1600 };
+  page.onLoadFinished = function (status) {
+    console.log('loaded:' + url);
+    
+    page.injectJs('/lib/findStyles.js');
+    
+    
+    var cssrules = page.evaluate(function () {
+      return window._wtcss_styles;
+    });
 
-page.onLoadStarted = function () {
-  console.log('loading...');
-};
+    callback({
+      img:page.renderBase64('png'),
+      css:cssrules
+    });
+  };
+  page.open(url);
+}
 
-page.onLoadFinished = function (status) {
-  console.log('loaded.');
-  
-  page.injectJs('/lib/findStyles.js');
-  
-  
-  var cssrules = page.evaluate(function () {
-    return window._wtcss_styles;
-  });
-  
-  var f = fs.open('public/data/'+fnKey+'.json', 'w');
-  f.write(JSON.stringify(cssrules));
-  f.close();
 
-  page.render('public/data/'+fnKey+'.png');
-  phantom.exit();
+// get('http://bfoxall.com', function(data){
+//   console.log("GOT DATA", JSON.stringify(data));
+// })
 
-};
+var server, service;
 
-page.open(url);
+server = webserver.create();
+
+var port = system.env.PORT || 8080;
+
+service = server.listen(port, function (request, response) {
+  var url = request.url;
+  if(url[1] == '?'){
+    console.log(url.substr(2));
+    var stripped = url.substr(2);
+    get(stripped, function(data){    
+      response.statusCode = 200;
+      response.write(JSON.stringify(data));
+      response.close();
+    });
+  } else { 
+    response.statusCode = 200;
+    response.write("<html><h1>'sup");
+    response.close();
+  }
+});
+
+console.log("Listening on " + port);
