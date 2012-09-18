@@ -29,7 +29,7 @@ function get(url, callback){
     });
 
     callback({
-      img:page.renderBase64('png'),
+      img:'data:image/gif;base64,' + page.renderBase64('png'),
       css:cssrules
     });
   };
@@ -37,29 +37,30 @@ function get(url, callback){
 }
 
 
-// get('http://bfoxall.com', function(data){
-//   console.log("GOT DATA", JSON.stringify(data));
-// })
-
 var server, service;
 
 server = webserver.create();
 
 var port = system.env.PORT || 8080;
 
+var html = fs.read('public/index.html');
+
 service = server.listen(port, function (request, response) {
   var url = request.url;
-  if(url[1] == '?'){
-    console.log(url.substr(2));
-    var stripped = url.substr(2);
+  var idx = url.indexOf('?url=');
+  if(idx != -1){
+    var stripped = unescape(url.substr(idx + 5));
+    console.log(stripped);
     get(stripped, function(data){    
       response.statusCode = 200;
       response.write(JSON.stringify(data));
       response.close();
     });
   } else { 
+    //
+    var html = fs.read('public/index.html');
     response.statusCode = 200;
-    response.write("<html><h1>'sup");
+    response.write(html);
     response.close();
   }
 });

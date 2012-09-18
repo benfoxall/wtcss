@@ -83,7 +83,7 @@ img{display:none;}
 	<p id="loading">loading</p>
 	
 	<div id="page">
-		<form method="post">
+		<form method="get">
 			<input type='text' value="http://" id="url" name="url"/>
 			<input type="submit" value="&raquo;" id="sub">	
 			<p>Enter a url to see how the css rules interact with that page</p>
@@ -104,11 +104,9 @@ img{display:none;}
 	
 	
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="lib/spinner.min.js" type="text/javascript" charset="utf-8"></script>
-
 <script type="text/javascript" charset="utf-8">
   var scale = 1;
-	var load = function(key){		
+	var load = function(data){		
 		var canvas = document.getElementById("canvas");  
 		
 		$(document).bind('render', function(){
@@ -157,14 +155,15 @@ img{display:none;}
 		$(window).on('resize scroll', function(){
 			$(document).trigger('render');
 		});
-		
-		$('img').attr('src',key + '.png')
+
+		$('img').attr('src',data.img);
+		$(document).trigger('render')
 		.on('load', function(){
 			$(document).trigger('render');
 		});
 		
 		// populate/hack
-		$.getJSON(key + '.json').done(function(data){
+		$.when(data.css).done(function(data){
 			var $rules = $('#rules').empty();
 			$rules.css('left','0');
 			var tmpl = '<li><span class="selector"></span></li>';
@@ -205,17 +204,29 @@ img{display:none;}
 		$('form').submit(function(e){
 			e.preventDefault();
 			var $form = $(this);
-			$.post('/', $form.serialize()).done(function(data){
-			console.log(data);
-				if(data.success){
+
+			$.get('/',$form.serializeArray())
+			.pipe(JSON.parse)
+			.done(function(){
+				$('#loading').animate({left:'0%'});
+			})
+			.done(load);
+
+			// $.get('/', $form.serialize()).done(function(data){
+
+
+			// 	console.log(data);
+			// 	if(data.success){
+
+
 					
-					$('#loading').animate({left:'0%'}, function(){
-						load('data/' + data.success);	
-					});
-				} else {
-					console.error(data.error || 'unknown error');
-				}
-			});
+			// 		$('#loading').animate({left:'0%'}, function(){
+			// 			load('data/' + data.success);	
+			// 		});
+			// 	} else {
+			// 		console.error(data.error || 'unknown error');
+			// 	}
+			// });
 			
 			$form.find('input').blur().animate({width:0, opacity:0}, function(){
 				$form.slideUp();
