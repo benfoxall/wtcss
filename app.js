@@ -21,7 +21,7 @@ app.post('/', function(req, res){
   var url = req.body.url;
   var key = fnCount++;
   
-  var proc  = spawn('./bin/phantomjs', ['generate.js', url, key]);
+  var proc  = spawn('phantomjs', ['generate.js', url, key]);
   
   console.log('spawned:', proc.pid, url, key);
   

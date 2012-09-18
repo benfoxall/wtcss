@@ -2,6 +2,7 @@
   "name": "wttcss",
   "version": "0.0.1",
   "dependencies": {
-    "express": "2.5.4"
+    "express": "2.5.4",
+    "request": "2.x"
   }
 }
