@@ -1,5 +1,5 @@
 // phantom js
-// 
+//
 // This generates :
 // - a screenshot of the page
 // - a list of the css rules and where they impact the page
@@ -7,6 +7,11 @@
 var fs = require('fs'),
     system = require('system'),
     webserver = require('webserver');
+
+
+var corsProx = system.env.PROX || 'http://localhost:5000/?url=',
+    port     = system.env.PORT || 8080;
+    
 
 function get(url, callback){
   var page = new WebPage();
@@ -20,6 +25,10 @@ function get(url, callback){
 
   page.onLoadFinished = function (status) {
     console.log('loaded:' + url);
+
+    page.evaluate(function(prox){
+      window._wtcss_prox = prox;
+    }, corsProx);
     
     page.injectJs('/lib/findStyles.js');
     
@@ -41,8 +50,6 @@ var server, service;
 
 server = webserver.create();
 
-var port = system.env.PORT || 8080;
-
 var html = fs.read('public/index.html');
 
 service = server.listen(port, function (request, response) {
@@ -51,12 +58,12 @@ service = server.listen(port, function (request, response) {
   if(idx != -1){
     var stripped = unescape(url.substr(idx + 5));
     console.log(stripped);
-    get(stripped, function(data){    
+    get(stripped, function(data){
       response.statusCode = 200;
       response.write(JSON.stringify(data));
       response.close();
     });
-  } else { 
+  } else {
     //
     var html = fs.read('public/index.html');
     response.statusCode = 200;
