@@ -217,7 +217,7 @@ a{color:#08f;text-decoration: none}
 			e.preventDefault();
 			var $form = $(this);
 
-			if(var _gaq && _gaq){
+			if(typeof(_gaq) !== 'undefined'){
 				var url = $('[name=url]').val();
 				_gaq.push(['_trackEvent', 'requests', 'get', url]);
 			}
