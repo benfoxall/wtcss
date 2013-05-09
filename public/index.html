@@ -215,10 +215,13 @@ a{color:#08f;text-decoration: none}
 			e.preventDefault();
 			var $form = $(this);
 
-			if(typeof(_gaq) !== 'undefined'){
-				var url = $('[name=url]').val();
+			var url = $('[name=url]').val();
+
+			if(typeof(_gaq) !== 'undefined')
 				_gaq.push(['_trackEvent', 'requests', 'get', url]);
-			}
+			
+			if(history.replaceState)
+				history.replaceState(null, "", "?" + $.param({url:url}));
 
 			var loadedYet;
 			$form.find('input').blur().animate({width:0, opacity:0}, function(){
@@ -228,7 +231,7 @@ a{color:#08f;text-decoration: none}
 			});
 
 
-			$.get('/',$form.serializeArray())
+			$.get('/data',$form.serializeArray())
 			.pipe(JSON.parse)
 			.done(function(){
 				loadedYet = true;
@@ -239,24 +242,19 @@ a{color:#08f;text-decoration: none}
 				$('#loading').html('&hellip;failed to load')
 			});
 
-			// $.get('/', $form.serialize()).done(function(data){
-
-
-			// 	console.log(data);
-			// 	if(data.success){
-
-
-					
-			// 		$('#loading').animate({left:'0%'}, function(){
-			// 			load('data/' + data.success);	
-			// 		});
-			// 	} else {
-			// 		console.error(data.error || 'unknown error');
-			// 	}
-			// });
-			
 			
 		})
+
+
+
+		// maybe spark it off?
+		if(window.location.search && window.location.search.indexOf('?url=') === 0){
+			var url = decodeURIComponent(window.location.search.substr(5))
+			console.log("--", url);
+			$('[name=url]').val(url);
+			$('form').submit();
+		}
+
 		
 		
 		
@@ -267,7 +265,6 @@ a{color:#08f;text-decoration: none}
 		$('#sites li').click(function(){
 			$('[name=url]').val($(this).text());
 			$('form').submit();
-			
 		});
 		
 		$('#zoom').toggle(function(){

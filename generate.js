@@ -54,9 +54,9 @@ var html = fs.read('public/index.html');
 
 service = server.listen(port, function (request, response) {
   var url = request.url;
-  var idx = url.indexOf('?url=');
+  var idx = url.indexOf('data?url=');
   if(idx != -1){
-    var stripped = unescape(url.substr(idx + 5));
+    var stripped = unescape(url.substr(idx + 9));
     console.log(stripped);
     get(stripped, function(data){
       response.statusCode = 200;
