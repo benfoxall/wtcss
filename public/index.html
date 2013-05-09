@@ -59,7 +59,7 @@ ol{
 	-webkit-transform-origin: 0 0;
 	-webkit-transition: -webkit-transform .5s;
 }
-#zoom{
+#zoom,#cancel{
 	position:fixed;
 	bottom:0;
 	right:0;
@@ -69,6 +69,10 @@ ol{
 	font-size:2em;
 	z-index:50;
 	cursor:pointer;
+}
+#cancel{
+	left:0;
+	background: none;
 }
 img{display:none;}
 a{color:#08f;text-decoration: none}
@@ -89,6 +93,7 @@ a{color:#08f;text-decoration: none}
 		<span class="total selected"></span> &raquo; <span class="active"></span>
 	</div>
 	<div id="zoom">-</div>
+	<div id="cancel"><a href='/'>&times;</a></div>
 	
 	<p id="loading">loading</p>
 	
