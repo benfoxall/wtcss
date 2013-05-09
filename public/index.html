@@ -99,14 +99,12 @@ a{color:#08f;text-decoration: none}
 			<p>Enter a url to see how the css rules interact with that page</p>
 			<p class="note">(Note, this is hacked together and might not work in many browsers. If it's hanging, give chrome a try)</p>
 			<p class="author">Details &rsaquo; <a href="http://benjaminbenben.com">BenjaminBenBen</a></p>
-			<!--<h3>Examples</h3>
+			<h3>Examples</h3>
 			<ul id="sites">
 				<li>http://google.com</li>
-				<li>http://mozzila.com</li>
-				<li data-id="w3c">http://www.w3.org/</li>
-				<li data-id="bf">http://bfoxall.com</li>
-				
-			</ul> -->
+				<li>http://www.w3.org/</li>
+				<li>http://twitter.github.io/bootstrap/</li>
+			</ul>
 		</form>
 		<canvas id="canvas"></canvas>
 		<img>
@@ -222,12 +220,24 @@ a{color:#08f;text-decoration: none}
 				_gaq.push(['_trackEvent', 'requests', 'get', url]);
 			}
 
+			var loadedYet;
+			$form.find('input').blur().animate({width:0, opacity:0}, function(){
+				$form.slideUp();
+				if(!loadedYet) $('#loading').animate({left:'50%'});
+				
+			});
+
+
 			$.get('/',$form.serializeArray())
 			.pipe(JSON.parse)
 			.done(function(){
+				loadedYet = true;
 				$('#loading').animate({left:'0%'});
 			})
-			.done(load);
+			.done(load)
+			.fail(function(){
+				$('#loading').html('&hellip;failed to load')
+			});
 
 			// $.get('/', $form.serialize()).done(function(data){
 
@@ -245,10 +255,6 @@ a{color:#08f;text-decoration: none}
 			// 	}
 			// });
 			
-			$form.find('input').blur().animate({width:0, opacity:0}, function(){
-				$form.slideUp();
-				$('#loading').animate({left:'50%'});
-			});
 			
 		})
 		
@@ -259,11 +265,8 @@ a{color:#08f;text-decoration: none}
 		// $('#loading').show();
 
 		$('#sites li').click(function(){
-			$('#sites').slideUp();
-			var id = $(this).data('id');
-			setTimeout(function(){
-				load('data/' + id);
-			},500);
+			$('[name=url]').val($(this).text());
+			$('form').submit();
 			
 		});
 		
