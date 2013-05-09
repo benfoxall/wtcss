@@ -71,6 +71,16 @@ ol{
 	cursor:pointer;
 }
 img{display:none;}
+a{color:#08f;text-decoration: none}
+.note{
+	margin-top:20px;
+	font-size:.7em;
+	max-width:24em;
+}
+.author{
+	margin-top:20px;
+	font-size:.7em;
+}
 </style>
 </head>
 <body>
@@ -87,6 +97,8 @@ img{display:none;}
 			<input type='text' value="http://" id="url" name="url"/>
 			<input type="submit" value="&raquo;" id="sub">	
 			<p>Enter a url to see how the css rules interact with that page</p>
+			<p class="note">(Note, this is hacked together and might not work in many browsers. If it's hanging, give chrome a try)</p>
+			<p class="author">Built by <a href="http://benjaminbenben.com">Ben Foxall</a></p>
 			<!--<h3>Examples</h3>
 			<ul id="sites">
 				<li>http://google.com</li>
