@@ -142,6 +142,7 @@ a:hover{text-decoration: underline}
 		
 		$('img').attr('src',data.img);
 		
+		
 		// populate/hack
 		var $rules = $('#rules').empty();
 		$rules.css('left','0');
@@ -225,6 +226,7 @@ a:hover{text-decoration: underline}
 
 	var resetForm = function(){
 		canvas.height = 0;
+		$('img').attr('src','data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==');
 		$('#rules').empty();
 		$('form').slideDown();
 		$('input').css({width:'',opacity:1});
