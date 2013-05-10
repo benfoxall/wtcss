@@ -131,7 +131,9 @@ a:hover{text-decoration: underline}
 	// always reset to home state 
 	// todo - use state of visited page
 	window.onpopstate = function(event) {
-		resetForm();
+		if(document.location.pathname == '/'){
+			resetForm();
+		}
 	};
 
   	var scale = 1,
@@ -244,6 +246,8 @@ a:hover{text-decoration: underline}
 	})
 
 	$(function(){
+		var skipPushState;
+
 		$('form').submit(function(e){
 			e.preventDefault();
 			var $form = $(this);
@@ -253,7 +257,7 @@ a:hover{text-decoration: underline}
 			if(typeof(_gaq) !== 'undefined')
 				_gaq.push(['_trackEvent', 'requests', 'get', url]);
 			
-			if(history.pushState)
+			if(history.pushState && !skipPushState)
 				history.pushState(null, "", "go?" + $.param({url:url}));
 
 			var loadedYet;
@@ -282,10 +286,10 @@ a:hover{text-decoration: underline}
 
 		// maybe spark it off?
 		if(window.location.search && window.location.search.indexOf('?url=') === 0){
+			skipPushState = true;
 			var url = decodeURIComponent(window.location.search.substr(5))
-			// console.log("--", url);
 			$('[name=url]').val(url);
-			// $('form').submit();
+			$('form').submit();
 		}
 
 		
