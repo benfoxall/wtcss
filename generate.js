@@ -41,6 +41,8 @@ function get(url, callback){
       img:'data:image/gif;base64,' + page.renderBase64('png'),
       css:cssrules
     });
+    
+    page.close();
   };
   page.open(url);
 }
