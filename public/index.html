@@ -224,10 +224,11 @@ a:hover{text-decoration: underline}
 	});
 
 	var resetForm = function(){
-		canvas.width = canvas.width;
+		canvas.height = 0;
 		$('#rules').empty();
-		$('form').slideDown()
-		$('input').css({width:'',opacity:1})
+		$('form').slideDown();
+		$('input').css({width:'',opacity:1});
+		$('#rulecount *').text('')
 	};
 
 	$('#rulecount span').click(function(e){
