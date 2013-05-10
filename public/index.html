@@ -283,9 +283,9 @@ a:hover{text-decoration: underline}
 		// maybe spark it off?
 		if(window.location.search && window.location.search.indexOf('?url=') === 0){
 			var url = decodeURIComponent(window.location.search.substr(5))
-			console.log("--", url);
+			// console.log("--", url);
 			$('[name=url]').val(url);
-			$('form').submit();
+			// $('form').submit();
 		}
 
 		
