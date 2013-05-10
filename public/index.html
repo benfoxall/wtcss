@@ -258,7 +258,7 @@ a:hover{text-decoration: underline}
 				_gaq.push(['_trackEvent', 'requests', 'get', url]);
 			
 			if(history.pushState && !skipPushState)
-				history.pushState(null, "", "go?" + $.param({url:url}));
+				history.pushState(null, "", "v1?" + $.param({url:url}));
 
 			var loadedYet;
 			$form.find('input').blur().animate({width:0, opacity:0}, function(){
