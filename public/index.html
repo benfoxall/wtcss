@@ -122,102 +122,132 @@ a:hover{text-decoration: underline}
 	
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
-  var scale = 1;
-	var load = function(data){		
-		var canvas = document.getElementById("canvas");
+	//
+	// THIS IS A HACKY MESS
+	//
+	//
+
+
+	// always reset to home state 
+	// todo - use state of visited page
+	window.onpopstate = function(event) {
+		if(document.location.pathname == '/'){
+			resetForm();
+		}
+	};
+
+  	var scale = 1,
+  		canvas = document.getElementById("canvas");
+
+	var load = function(data){
+		scale = 1;
 		
-		$(document).bind('render', function(){
-			var height = $(window).height(), width = $(window).width()/2;
-			canvas.width = width;
-			canvas.height = height;
-
-			if (canvas.getContext) {  
-				var ctx = canvas.getContext("2d");  
-				ctx.drawImage(document.images[0], 0,0);
-
-
-				// ctx.strokeStyle = "#08f";  
-
-				var top = $(document).scrollTop();
-				$('#rules li:visible').each(function(){
-					$rule = $(this);
-					var y = $(this).offset().top - top;
-					
-					if(y < 0 || y > height){return;}
-					
-					y += ($(this).outerHeight()*scale)/2;
-					
-					var links = $(this).data('links') || [];
-					var opacity = 0.25 + (0.75/links.length); // assign an opacity based on the number of links
-					
-					// #08f
-					ctx.strokeStyle = "rgba(0, 136, 255, "+opacity+")"; 
-					
-					$.each(links, function(i,link){
-						ctx.beginPath();  
-						ctx.moveTo(link[1],link[0]);
-
-						// ctx.lineTo(canvas.width,y);
-						// make it slightly more fancy
-						var controlX = (link[1] + width) / 2;
-						ctx.bezierCurveTo(controlX, y,controlX, y, width,y)
-
-						ctx.stroke();
-					});
-				});
-
-			}
-		});
-		
-		$(window).on('resize scroll', function(){
-			$(document).trigger('render');
-		});
-
 		$('img').attr('src',data.img);
+		
+		
+		// populate/hack
+		var $rules = $('#rules').empty();
+		$rules.css('left','0');
+		var tmpl = '<li><span class="selector"></span></li>';
+		var activeCount = 0;
+		$.each(data.css, function(_i, arr){
+			var rule = arr[0].split('{');
+			var el = $(tmpl);
+			el.find('.selector').text(rule[0])
+			el.append('{' + rule.slice(1).join('{'))
+			el.data('links', arr.slice(1));
+			if(arr.length == 1){
+				el.addClass('none');
+			} else {
+				activeCount++;
+			}
+			el.appendTo(rules);
+			
+		});
+		
+		$rules.animate({'left':'50%'});
+		$('#rulecount .total').text(data.css.length + ' rules');
+		$('#rulecount .active').text(activeCount + ' active');
+
+		// render render render
 		$(document).trigger('render')
 		setTimeout(function(){
 			$(document).trigger('render');
 		},250);
-		
-		// populate/hack
-		$.when(data.css).done(function(data){
-			var $rules = $('#rules').empty();
-			$rules.css('left','0');
-			var tmpl = '<li><span class="selector"></span></li>';
-			var activeCount = 0;
-			$.each(data, function(_i, arr){
-				var rule = arr[0].split('{');
-				var el = $(tmpl);
-				el.find('.selector').text(rule[0])
-				el.append('{' + rule.slice(1).join('{'))
-				el.data('links', arr.slice(1));
-				if(arr.length == 1){
-					el.addClass('none');
-				} else {
-					activeCount++;
-				}
-				el.appendTo(rules);
-				
-			});
-			
-			$rules.animate({'left':'50%'});
-			$('#rulecount .total').text(data.length + ' rules');
-			$('#rulecount .active').text(activeCount + ' active');
-			$(document).trigger('render');
-		});
-		
-		$('#rulecount span').click(function(e){
-			$(this).addClass('selected').siblings().removeClass('selected');
-			var active = $(this).hasClass('active');
-			$('li.none').each(function(){
-				// this is ridiculously faster than .toggle
-				this.style.display = active ? 'none' : 'block';
-			})
-			$(document).trigger('render');
-		})
+
 	}
 
+
+	$(window).on('resize scroll', function(){
+		$(document).trigger('render');
+	});
+
+
+	$(document).on('render', function(){
+		var height = $(window).height(), width = $(window).width()/2;
+		canvas.width = width;
+		canvas.height = height;
+
+		if (canvas.getContext) {  
+			var ctx = canvas.getContext("2d");  
+			ctx.drawImage(document.images[0], 0,0);
+
+
+			// ctx.strokeStyle = "#08f";  
+
+			var top = $(document).scrollTop();
+			$('#rules li:visible').each(function(){
+				$rule = $(this);
+				var y = $(this).offset().top - top;
+				
+				if(y < 0 || y > height){return;}
+				
+				y += ($(this).outerHeight()*scale)/2;
+				
+				var links = $(this).data('links') || [];
+				var opacity = 0.25 + (0.75/links.length); // assign an opacity based on the number of links
+				
+				// #08f
+				ctx.strokeStyle = "rgba(0, 136, 255, "+opacity+")"; 
+				
+				$.each(links, function(i,link){
+					ctx.beginPath();  
+					ctx.moveTo(link[1],link[0]);
+
+					// ctx.lineTo(canvas.width,y);
+					// make it slightly more fancy
+					var controlX = (link[1] + width) / 2;
+					ctx.bezierCurveTo(controlX, y,controlX, y, width,y)
+
+					ctx.stroke();
+				});
+			});
+
+		}
+	});
+
+	var resetForm = function(){
+		canvas.height = 0;
+		$('img').attr('src','data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==');
+		$('#rules').empty();
+		$('form').slideDown();
+		$('input').css({width:'',opacity:1});
+		$('#rulecount *').text('')
+	};
+
+	$('#rulecount span').click(function(e){
+		$(this).addClass('selected').siblings().removeClass('selected');
+		var active = $(this).hasClass('active');
+		$('li.none').each(function(){
+			// this is ridiculously faster than .toggle
+			this.style.display = active ? 'none' : 'block';
+		})
+		$(document).trigger('render');
+	})
+
 	$(function(){
+		var skipPushState;
+
 		$('form').submit(function(e){
 			e.preventDefault();
 			var $form = $(this);
@@ -227,8 +257,8 @@ a:hover{text-decoration: underline}
 			if(typeof(_gaq) !== 'undefined')
 				_gaq.push(['_trackEvent', 'requests', 'get', url]);
 			
-			if(history.replaceState)
-				history.replaceState(null, "", "go?" + $.param({url:url}));
+			if(history.pushState && !skipPushState)
+				history.pushState(null, "", "v1?" + $.param({url:url}));
 
 			var loadedYet;
 			$form.find('input').blur().animate({width:0, opacity:0}, function(){
@@ -256,8 +286,8 @@ a:hover{text-decoration: underline}
 
 		// maybe spark it off?
 		if(window.location.search && window.location.search.indexOf('?url=') === 0){
+			skipPushState = true;
 			var url = decodeURIComponent(window.location.search.substr(5))
-			console.log("--", url);
 			$('[name=url]').val(url);
 			$('form').submit();
 		}
