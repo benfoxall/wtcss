@@ -9,9 +9,9 @@ var fs = require('fs'),
     webserver = require('webserver');
 
 
-var corsProx = system.env.PROX, // || 'http://localhost:5000/?url=',
+var corsProx = system.env.PROX,
     port     = system.env.PORT || 8080;
-    
+
 
 function get(url, callback){
   var page = new WebPage();
@@ -29,10 +29,10 @@ function get(url, callback){
     page.evaluate(function(prox){
       window._wtcss_prox = prox;
     }, corsProx);
-    
+
     page.injectJs('/lib/findStyles.js');
-    
-    
+
+
     var cssrules = page.evaluate(function () {
       return window._wtcss_styles;
     });
@@ -41,7 +41,7 @@ function get(url, callback){
       img:'data:image/gif;base64,' + page.renderBase64('png'),
       css:cssrules
     });
-    
+
     page.close();
   };
   page.open(url);
