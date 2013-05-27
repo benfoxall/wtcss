@@ -9,7 +9,7 @@ var fs = require('fs'),
     webserver = require('webserver');
 
 
-var corsProx = system.env.PROX || 'http://localhost:5000/?url=',
+var corsProx = system.env.PROX, // || 'http://localhost:5000/?url=',
     port     = system.env.PORT || 8080;
     
 
