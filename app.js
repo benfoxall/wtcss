@@ -38,7 +38,7 @@ function get(url, callback){
     });
 
     callback({
-      img:'data:image/gif;base64,' + page.renderBase64('png'),
+      img:'data:image/png;base64,' + page.renderBase64('png'),
       css:cssrules
     });
 
