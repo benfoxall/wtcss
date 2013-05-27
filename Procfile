@@ -1,1 +1,1 @@
-web: phantomjs generate.js
+web: phantomjs app.js
